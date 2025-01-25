@@ -201,10 +201,15 @@ fun unpackDungeon(path: String, outPath: String? = null) {
     }
 
     val addressList = mutableListOf<Int>()
+    val sizeList = mutableListOf<Int>()
+
+    val outputDirectory = outPath ?: "output"
+    val baseFileName = File(path).nameWithoutExtension
+    File(outputDirectory).mkdirs()
 
     RandomAccessFile(path, "r").use { raf ->
         val fileCount = readInt(raf, ByteOrder.LITTLE_ENDIAN)
-        println("fileCount: $fileCount")
+        println("Found: $fileCount files")
 
         var baseAddress = fileCount * 4 + 4
         addressList.add(baseAddress)
@@ -214,12 +219,26 @@ fun unpackDungeon(path: String, outPath: String? = null) {
             baseAddress += value
             baseAddress = roundUpToNextMultipleOf(baseAddress, 0x10)
             addressList.add(baseAddress)
+            sizeList.add(value)
+        }
+
+        for (i in 0 until fileCount) {
+            val address = addressList[i]
+            val size = sizeList[i]
+
+            raf.seek(address.toLong())
+
+            val data = ByteArray(size)
+            raf.readFully(data)
+
+            val fIdx = String.format("%03d", i)
+
+            val outputFile = File(outputDirectory, "${baseFileName}_$fIdx.bin")
+            outputFile.writeBytes(data)
+            println("File extracted: ${outputFile.absolutePath}")
         }
     }
-
-    println("addressList: $addressList")
 }
-
 /**
  * Decodes an event file's flow script
  * @param path the path to the file to decode
