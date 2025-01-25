@@ -39,6 +39,8 @@ fun runCmdInterface() {
                 3 -> combineEVS(sc)
                 4 -> txtToPO(sc)
                 5 -> poToTXT(sc)
+                6 -> unpackDungeonBIN(sc)
+                //7 -> repackDungeonBIN(sc)
                 99, -1 -> {
                     isLeaving = true
                     println("See ya next time!")
@@ -312,6 +314,34 @@ private fun poToTXT(sc: Scanner) {
 }
 
 /**
+ * Method for extracting dng/dxx.bin
+ * @param sc the Scanner object to read more user inputs
+ * @throws OperationNotSupportedException custom exception messages here
+ * @throws IOException file related exceptions
+ */
+@Throws(OperationNotSupportedException::class, IOException::class)
+private fun unpackDungeonBIN(sc: Scanner) {
+    println("Enter the absolute path of the file:")
+    val input = requestInput(sc)
+
+    if (checkIfCancel(input)) return
+
+    if (File(input).exists()) {
+        val file = File(input)
+        println("Enter the absolute path for the extraction destination:")
+        val output = requestInput(sc)
+
+        if (checkIfCancel(input)) return
+
+        println("Extracting: ${file.name}")
+        unpackDungeon(input, output)
+    } else {
+        println("File not found. Please try again...")
+    }
+    println("The files have been extracted")
+}
+
+/**
  * Auxiliary method for asking the user if the extracted files are from the japanese version of the game
  * @param sc the Scanner object to read more user inputs
  * @return `1` for yes, `0` for no or `-1` for none of the above
@@ -401,6 +431,8 @@ private fun printInstructions() {
     println("3 - combine EVS files to form a new BIN file")
     println("4 - convert a TXT file to GNU GetText PO")
     println("5 - convert a GNU GetText PO to TXT file")
+    println("6 - unpack a dng/dxx.bin file")
+    println("7 - repack a dng/dxx.bin file")
     println("99 - exit")
     println()
 }

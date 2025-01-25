@@ -194,6 +194,32 @@ fun archive(ebootPath: String, dirPath: String, destinationDir: String, filename
     }
 }
 
+@Throws(IOException::class, OperationNotSupportedException::class)
+fun unpackDungeon(path: String, outPath: String? = null) {
+    if (!path.endsWith(EXTENSION_1) && !path.endsWith(EXTENSION_2)) {
+        throw OperationNotSupportedException("Only .bin files are supported")
+    }
+
+    val addressList = mutableListOf<Int>()
+
+    RandomAccessFile(path, "r").use { raf ->
+        val fileCount = readInt(raf, ByteOrder.LITTLE_ENDIAN)
+        println("fileCount: $fileCount")
+
+        var baseAddress = fileCount * 4 + 4
+        addressList.add(baseAddress)
+
+        repeat(fileCount) {
+            val value = readInt(raf, ByteOrder.LITTLE_ENDIAN)
+            baseAddress += value
+            baseAddress = roundUpToNextMultipleOf(baseAddress, 0x10)
+            addressList.add(baseAddress)
+        }
+    }
+
+    println("addressList: $addressList")
+}
+
 /**
  * Decodes an event file's flow script
  * @param path the path to the file to decode

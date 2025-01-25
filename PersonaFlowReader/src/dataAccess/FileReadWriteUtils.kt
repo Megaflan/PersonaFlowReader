@@ -110,3 +110,7 @@ fun roundToLBA(number: Int): Int {
     return if (rest == 0) 0
         else number + LBA - rest
 }
+
+fun roundUpToNextMultipleOf(value: Int, multipleOf: Int): Int {
+    return if (value % multipleOf == 0) value else ((value / multipleOf) + 1) * multipleOf
+}
